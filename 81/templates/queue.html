@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <title>Lights On!</title>
+
+  </head>
+
+  <body>
+
+    <div>
+      <div id="logo-container">
+        <img src="{{url_for('static', filename='SPL_logo.png')}}" alt="menu" id="spl-logo">
+      </div>
+      <p id="menu-title">QUEUE</p>
+      <p>UUID: {{ uuid }}</p>
+      <p>IP Address: {{ ip }}</p>
+    </div>
+
+    <button onclick="document.location='http://{{ self_ip }}:5000/end'">End Session</button>
+
+  </body>
+
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+
+  <head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.css" integrity="sha512-lvdq1fIyCp6HMWx1SVzXvGC4jqlX3e7Xm7aCBrhj5F1WdWoLe0dBzU0Sy10sheZYSkJpJcboMNO/4Qz1nJNxfA==" crossorigin="anonymous" />
+
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reinvented-color-wheel@0.1.6/css/reinvented-color-wheel.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/reinvented-color-wheel@0.1.6"></script>
+
+    <title>Lights On!</title>
+
+  </head>
+
+  <body>
+
+    <div>
+      <div id="logo-container">
+        <img src="{{url_for('static', filename='SPL_logo.png')}}" alt="menu" id="spl-logo">
+      </div>
+
+      <!-- SYNCON modal; informs user that they have been kicked off -->
+      <div id="kicked-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-content-title"><center>Looks like someone entered the <b style="color:rgb(235, 16, 0); font-weight: 200;">Special Code</b>, and is making the entire library sparkle!</center></div>
+          <p><center>After they are done, use the code <div class="special-code">2S5J</div> to make the entire library sparkle yourself! <Br><Br>Click on the multicoloured light bulb on the SPLsparkles.ca webpage, and enter the special code.</center></p>
+          <div id="modal-ok-bttn" onclick='window.location.replace("http://{{ self_ip }}{{ self_port }}/end");'><center>OK</center></div>
+        </div>
+      </div>
+      
+      <div id="info_msg">
+        {% if dmx == 0 %}
+          <p>Tap the buttons below to change the LED effect displayed.</p>
+        {% endif %}
+        {% if dmx == 1 %}
+          <p>Tap the buttons below to change the light routine displayed.</p>
+        {% endif %}
+        <p>Some effects have options, such as speed and colour.</p>
+
+        <p><center>Time remaining:</center></p>
+        <div id="clock-container">
+          <div id="clock" style="color: rgb(230,0,0);"></div>
+        </div>
+        <p>To give someone else a turn, click "leave".</p>
+        <button id="leave-bttn" onclick="syncoff();">Leave</button>
+        <br>
+        <p>If you want to <b>stop controlling this display</b> and choose another display, click <a href="http://{{ self_ip }}{{ self_port }}/chooseanother">Here</a></p>
+      </div>
+
+      {% if dmx == 0 %}
+      <div id="button-container">
+        <p id="effect-title">Interactive</p>
+
+        <!-- COLOUR PICKER -->
+        <div class="effect-button" alt="Colour Picker" onclick="display_effect('STREAM'); panel_open(['color-picker-stream'])">
+          <img src="{{url_for('static', filename='icons/pick.png')}}" class="effect-img">
+          <p class="effect-name">Colour Picker</p>
+        </div>
+
+        <div class="color-picker" id="color-picker-stream"></div>
+        <!-- COLOUR PICKER -->
+
+      </div>
+      <div id="button-container">
+        <p id="effect-title">Effects</p>
+
+        <!-- FADE IN -->
+        <div class="effect-button" alt="Fade In" onclick="display_effect('FADEIN'); panel_open(['speed-fadein'])">
+          <img src="{{url_for('static', filename='icons/fadeIn.png')}}" class="effect-img">
+          <p class="effect-name-2">Rainbow Fade-In</p>
+        </div>
+
+        <div class="slider-container" id="speed-fadein">
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-fadein"></div>
+        </div>
+        <!-- FADE IN -->
+
+        <!-- RAINBOW -->
+        <div class="effect-button" alt="Rainbow" onclick="display_effect('RAINBOW'); panel_open(['speed-rainbow'])">
+          <img src="{{url_for('static', filename='icons/rainbow.png')}}" class="effect-img">
+          <p class="effect-name">Rainbow</p>
+        </div>
+
+        <div class="slider-container" id="speed-rainbow">
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-rainbow"></div>
+        </div>
+        <!-- RAINBOW -->
+
+        <!-- CHASE -->
+        <div class="effect-button" alt="Chase" onclick="display_effect('CHASE'); panel_open(['color-picker-chase','speed-chase'])">
+          <img src="{{url_for('static', filename='icons/chase.png')}}" class="effect-img">
+          <p class="effect-name">Chase</p>
+        </div>
+
+        <div class="slider-container" id="speed-chase">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-chase"></div>
+        </div>
+        
+        <div class="color-picker" id="color-picker-chase"></div>
+        <!-- CHASE -->
+
+        <!-- DUALCHASE -->
+        <div class="effect-button" alt="Dual Chase" onclick="display_effect('DUALCHASE'); panel_open(['color-picker-chase2','speed-chase2'])">
+          <img src="{{url_for('static', filename='icons/dualchase.png')}}" class="effect-img">
+          <p class="effect-name">Dual Chase</p>
+        </div>
+
+        <div class="slider-container" id="speed-chase2">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-chase2"></div>
+        </div>
+
+        <div class="color-picker" id="color-picker-chase2"></div>
+        <!-- DUALCHASE -->
+
+        <!-- TRIPLECHASE -->
+        <div class="effect-button" alt="Triple Chase" onclick="display_effect('TRIPLECHASE'); panel_open(['color-picker-chase3','speed-chase3'])">
+          <img src="{{url_for('static', filename='icons/triplechase.png')}}" class="effect-img">
+          <p class="effect-name">Triple Chase</p>
+        </div>
+
+        <div class="slider-container" id="speed-chase3">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-chase3"></div>
+        </div>
+
+        <div class="color-picker" id="color-picker-chase3"></div>
+        <!-- TRIPLECHASE -->
+
+        <!-- THREATRECHASE -->
+        <div class="effect-button" alt="Theatre Chase" onclick="display_effect('THEATRE'); panel_open(['color-picker-theatrechase','speed-theatrechase'])">
+          <img src="{{url_for('static', filename='icons/theatreChase.png')}}" class="effect-img">
+          <p class="effect-name-2">Theatre Chase</p>
+        </div>
+
+        <div class="slider-container" id="speed-theatrechase">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-theatrechase"></div>
+        </div>
+
+        <div class="color-picker" id="color-picker-theatrechase"></div>
+        <!-- THREATRECHASE -->
+
+        <!-- BUILD UP DOWN -->
+        <div class="effect-button" alt="Build Up/Down" onclick="display_effect('BUILDUPDOWN'); panel_open(['color-picker-build','speed-build','chunk-build'])">
+          <img src="{{url_for('static', filename='icons/build.png')}}" class="effect-img">
+          <p class="effect-name-2">Build Up/Down</p>
+        </div>
+
+        <div class="slider-container" id="speed-build">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-build"></div>
+        </div>
+        
+        <div class="color-picker" id="color-picker-build"></div>
+
+        <div class="slider-container" id="chunk-build">      
+          <img src="{{url_for('static', filename='icons/small_block.png')}}" class="speed-img">
+          <p>Block Size</p>
+          <img src="{{url_for('static', filename='icons/large_block.png')}}" class="speed-img">
+          <div class="speed-slider" id="chunk-slider-build"></div>
+        </div>
+        <!-- BUILD UP DOWN -->
+
+        <!-- METEOR 
+        <div class="effect-button" alt="Meteor" onclick="display_effect('COMET'); panel_open([])">
+          <img src="{{url_for('static', filename='icons/comet.png')}}" class="effect-img">
+          <p class="effect-name-2">Meteor</p>
+        </div>
+         METEOR -->
+
+      </div>
+      {% endif %}
+
+      {% if dmx == 1 %}
+      <div id="button-container">
+        <p id="effect-title">Routines</p>
+
+        <div class="effect-button" alt="Random!" onclick="display_effect('RANDOM')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Random!</p>
+        </div>
+
+        <div class="effect-button" alt="Routine 1" onclick="display_effect('ROUTINE1')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 1</p>
+        </div>
+
+        <div class="effect-button" alt="Routine 3" onclick="display_effect('ROUTINE2')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 2</p>
+        </div>
+
+        <div class="effect-button" alt="Routine 4" onclick="display_effect('ROUTINE3')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 3</p>
+        </div>
+
+        <div class="effect-button" alt="Routine 5" onclick="display_effect('ROUTINE4')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 4</p>
+        </div>
+        
+        <div class="effect-button" alt="Routine 6" onclick="display_effect('ROUTINE5')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 5</p>
+        </div>
+
+        <div class="effect-button" alt="Routine 7" onclick="display_effect('ROUTINE6')">
+          <img src="{{url_for('static', filename='icons/colours1.png')}}" class="effect-img">
+          <p class="effect-name">Routine 6</p>
+        </div>
+
+      </div>
+      {% endif %}
+
+    </div>
+
+    <div id="footer">
+      <p>Matthew Hengeveld 2020</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" integrity="sha512-BHDCWLtdp0XpAFccP2NifCbJfYoYhsRSZOUM3KnAxy2b/Ay3Bn91frud+3A95brA4wDWV3yEOZrJqgV8aZRXUQ==" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <!-- <script src="{{ url_for('static', filename='ledctrl.js') }}"></script> -->
+
+    <script>
+          
+      // var ledctrl_socket = new WebSocket('ws://192.168.0.41:31415/ledctrl');
+      let ledctrl_socket = new WebSocket('ws://{{ self_ip }}:31415/ledctrl');
+
+      // wait for each websocket connection, timeout if too long
+      function waitForConnection(socket, ip) {
+        setTimeout(
+          function () {
+            if (socket.readyState === 1) {
+              console.log("connection to " + ip + " successful");
+              // send SYNCON command to other RPIs
+              msg = {"CMD":"SYNCON", "uuid":user_uuid, "IP":ip};
+              socket.send(JSON.stringify(msg));
+              msg = {"CMD":"STREAM", "uuid":user_uuid, "IP":ip, "Data":[c[0], c[1], c[2]] }
+              socket.send(JSON.stringify(msg));
+            } else {
+              console.log("connecting...");
+              waitForConnection(socket, ip, c);
+            }
+          }, 25); // wait 25ms
+      }
+
+      // other RPi connections
+      var ctrl_all = ('{{ ctrl_all }}' === 'True');
+      // console.log(ctrl_all);
+      var conn_list = [];
+      if (ctrl_all == true) {
+        console.log("Controlling all displays");
+        var ip_list_str = '{{ ip_list | tojson }}'
+        var ip_list_array = ip_list_str.substring(2, ip_list_str.length-2).split(",");
+
+        var alt = 1;
+
+        for (let i = 0; i < ip_list_array.length; i++){
+          ip_list_array[i] = ip_list_array[i].substring(1, ip_list_array[i].length-1);
+          if (ip_list_array[i].charAt(0) == '"') {
+            ip_list_array[i] = ip_list_array[i].substring(1, ip_list_array[i].length);
+          }
+
+          // create array of ws connections to other RPis
+          conn_list.push(new WebSocket('ws://' + ip_list_array[i] + ':31415/ledctrl'));
+
+          var c = null;
+
+          // green HSV: 116, 100, 70
+          // red HSV: 0, 100, 70
+
+          if (alt == 1) {
+            c = [116, 100, 70];
+          } else {
+            c = [0, 100, 70];
+          }
+          alt = alt * -1;
+
+          waitForConnection(conn_list[i], ip_list_array[i]);
+        }
+      }
+
+      // user and sessions variables from flask
+      var user_uuid = '{{ user_uuid }}';
+      var user_ip = '{{ user_ip }}';
+      var time_left = parseInt("{{ time_wait }}");
+
+      // color picker
+      var colorWheel = null;
+      var time_updated = 0;
+
+      // convert time to string with :
+      function time_to_str(time) {
+        var time_left_s = time_left % 60;
+        var time_left_m = (time_left - time_left_s) / 60;
+        if (time_left_s < 10) {
+          return time_left_m.toString() + ":0" + time_left_s.toString();
+        } else {
+          return time_left_m.toString() + ":" + time_left_s.toString();
+        }
+      }
+
+      // set clock to display time left
+      $("#clock").html(time_to_str(time_left));
+
+      // update clock every second
+      setInterval(() => {
+        time_left--;
+
+        $("#clock").html(time_to_str(time_left));
+
+        if (time_left < -5) {
+          window.location.replace("http://{{ self_ip }}{{ self_port }}/end");
+        }
+      }, 1000);
+
+      // on page load
+      document.addEventListener('DOMContentLoaded', () => {
+
+        // Connect to Socketio
+        var flask_socket = io.connect('http://{{ self_ip }}{{ self_port }}');
+
+        // When connected
+        // flask_socket.on('connect', () => {
+        //     console.log("Connecting to flask");
+        // });
+
+        // check time elapsed with server every second
+        setInterval(() => {
+          flask_socket.emit('check', {'message':'none'});
+        }, 1000);
+
+        // socketio check event handler
+        function check_handler(data) {
+          msg = JSON.parse(data);
+          if (msg.check_result == true) {
+            console.log("Time expired");
+            // tell everyone else to turn SYNC OFF
+            if (ctrl_all == true) {
+              for (let i = 0; i < conn_list.length; i++){
+                console.log("Turning off SYNC");
+                msg = {"CMD":"SYNCOFF", "uuid":user_uuid, "IP":ip_list_array[i]};
+                conn_list[i].send(JSON.stringify(msg));
+              }
+            }
+
+            setTimeout(function () {
+              window.location.replace("http://{{ self_ip }}{{ self_port }}/end");
+            }, 250);
+          }
+        }
+
+        // set check event handler
+        flask_socket.on('check_result', check_handler)
+
+
+        // https://www.cssscript.com/hsv-hsl-color-wheel-picker-reinvented/
+        window.CW_setup = [
+          ["color-picker-chase", [0, 100, 80]],
+          ["color-picker-chase2", [0, 100, 80]],
+          ["color-picker-chase3", [0, 100, 80]],
+          ["color-picker-theatrechase", [0, 100, 80]],
+          ["color-picker-build", [220, 100, 80]]
+        ];
+
+        window.CWs = [];
+
+        window.CWindex;
+        for (window.CWindex = 0; window.CWindex < window.CW_setup.length; window.CWindex++) {
+          cw = new ReinventedColorWheel({
+            appendTo: document.getElementById(window.CW_setup[window.CWindex][0]),
+            hsv: window.CW_setup[window.CWindex][1],
+            // appearance
+            wheelDiameter: 300,
+            wheelThickness: 40,
+            handleDiameter: 32,
+            wheelReflectsSaturation: false,
+
+            // handler
+            onChange: function (color) {
+              msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":user_ip, "Colour":[color.hsv[0], color.hsv[1], color.hsv[2]] };
+              ledctrl_socket.send(JSON.stringify(msg));
+              if (ctrl_all == true) {
+                // console.log("sending msg to other RPis...");
+                for (let i = 0; i < conn_list.length; i++){
+                  msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":ip_list_array[i], "Colour":[color.hsv[0], color.hsv[1], color.hsv[2]] };
+                  conn_list[i].send(JSON.stringify(msg));
+                }
+              }
+            }
+          });
+          CWs.push(cw);
+        }
+
+        colorWheel = new ReinventedColorWheel({
+          appendTo: document.getElementById("color-picker-stream"),
+          hsv: [0, 100, 80],
+          // appearance
+          wheelDiameter: 300,
+          wheelThickness: 40,
+          handleDiameter: 32,
+          wheelReflectsSaturation: false,
+
+          // handler
+          onChange: function (color) {
+            msg = {"CMD":"STREAM", "uuid":user_uuid, "IP":user_ip, "Data":[color.hsv[0], color.hsv[1], color.hsv[2]] }
+            ledctrl_socket.send(JSON.stringify(msg));
+            if (ctrl_all == true) {
+              // console.log("sending msg to other RPis...");
+              for (let i = 0; i < conn_list.length; i++){
+                msg = {"CMD":"STREAM", "uuid":user_uuid, "IP":ip_list_array[i], "Data":[color.hsv[0], color.hsv[1], color.hsv[2]] };
+                conn_list[i].send(JSON.stringify(msg));
+              }
+            }
+          }
+        });
+
+        window.SL_setup = [
+          ["#speed-slider-fadein", -15, -25, -1, 1],
+          ["#speed-slider-rainbow", -80, -160, -6, 1],
+          ["#speed-slider-chase", -25, -80, -8, 1],
+          ["#speed-slider-chase2", -25, -80, -8, 1],
+          ["#speed-slider-chase3", -25, -80, -8, 1],
+          ["#speed-slider-build", -0.8, -0.9, -0.55, 0.05],
+          ["#speed-slider-theatrechase", -40, -80, -25, 1]
+        ];
+
+        window.SLindex;
+        for (window.SLindex = 0; window.SLindex < window.SL_setup.length; window.SLindex++) {
+          $(window.SL_setup[window.SLindex][0]).slider({
+            value: window.SL_setup[window.SLindex][1],
+            min: window.SL_setup[window.SLindex][2],
+            max: window.SL_setup[window.SLindex][3],
+            step: window.SL_setup[window.SLindex][4],
+            slide: function( event, spd ) {
+              msg = {"CMD":"SPDCHNG", "uuid":user_uuid, "IP":user_ip, "Speed":Math.abs(spd.value) };
+              ledctrl_socket.send(JSON.stringify(msg));
+              if (ctrl_all == true) {
+                // console.log("sending msg to other RPis...");
+                for (let i = 0; i < conn_list.length; i++){
+                  msg = {"CMD":"SPDCHNG", "uuid":user_uuid, "IP":ip_list_array[i], "Speed":Math.abs(spd.value) };
+                  conn_list[i].send(JSON.stringify(msg));
+                }
+              }
+            }
+          });
+        }
+
+      });
+
+      $("#chunk-slider-build").slider({
+        value: 14,
+        min: 4,
+        max: 26,
+        step: 1,
+        slide: function( event, spd ) {
+          msg = {"CMD":"CHNKCHNG", "uuid":user_uuid, "IP":user_ip, "Block":Math.abs(spd.value) };
+          ledctrl_socket.send(JSON.stringify(msg));
+          if (ctrl_all == true) {
+            // console.log("sending msg to other RPis...");
+            for (let i = 0; i < conn_list.length; i++){
+              msg = {"CMD":"CHNKCHNG", "uuid":user_uuid, "IP":ip_list_array[i], "Block":Math.abs(spd.value) };
+              conn_list[i].send(JSON.stringify(msg));
+            }
+          }
+        }
+      });
+
+      // if time has elapsed and server has not signalled, exit anyways
+      setInterval(() => {
+        if (time_left < -5) {
+          window.location.replace("http://{{ self_ip }}{{ self_port }}/end");
+        }
+      }, 1000);
+
+      function syncoff() {
+        if (ctrl_all == true) {
+          for (let i = 0; i < conn_list.length; i++){
+            console.log("Turning off SYNC");
+            msg = {"CMD":"SYNCOFF", "uuid":user_uuid, "IP":ip_list_array[i]};
+            conn_list[i].send(JSON.stringify(msg));
+          }
+
+          setTimeout(function () {
+            window.location.replace("http://{{ self_ip }}{{ self_port }}/end");
+          }, 250);
+        } else {
+          window.location.replace("http://{{ self_ip }}{{ self_port }}/end");
+        }
+      }
+
+      // on websocket connection with led control
+      // ledctrl_socket.onopen = function(event) {
+      //   console.log('Connected.');
+      // };
+
+      // on websocket error
+      // ledctrl_socket.onerror = function(error) {
+      //   console.log('WebSocket error: ' + error);
+      // };
+
+      // send display effect command to led control
+      function display_effect(effect_cmd) {
+        if (effect_cmd == 'STREAM') {
+          msg = {"CMD":effect_cmd, "uuid":user_uuid, "IP":user_ip, "Data":[0,100,99]};
+          ledctrl_socket.send(JSON.stringify(msg));
+          if (ctrl_all == true) {
+            // console.log("sending msg to other RPis...");
+            for (let i = 0; i < conn_list.length; i++){
+              msg = {"CMD":effect_cmd, "uuid":user_uuid, "IP":ip_list_array[i], "Data":[0,100,99]};
+              conn_list[i].send(JSON.stringify(msg));
+            }
+          }
+        } else {
+          msg = {"CMD":effect_cmd, "uuid":user_uuid, "IP":user_ip};
+          ledctrl_socket.send(JSON.stringify(msg));
+          if (ctrl_all == true) {
+            // console.log("sending msg to other RPis...");
+            for (let i = 0; i < conn_list.length; i++){
+              msg = {"CMD":effect_cmd, "uuid":user_uuid, "IP":ip_list_array[i]};
+              conn_list[i].send(JSON.stringify(msg));
+            }
+          }
+          if (effect_cmd == 'CHASE' || effect_cmd == 'DUALCHASE' || effect_cmd == 'TRIPLECHASE' || effect_cmd == 'THEATRE') {
+            msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":user_ip, "Colour":[0,100,100] };
+            ledctrl_socket.send(JSON.stringify(msg));
+            if (ctrl_all == true) {
+              // console.log("sending msg to other RPis...");
+              for (let i = 0; i < conn_list.length; i++){
+                msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":ip_list_array[i], "Colour":[0,100,100] };
+                conn_list[i].send(JSON.stringify(msg));
+              }
+            }
+          }
+          if (effect_cmd == 'BUILDUPDOWN') {
+            msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":user_ip, "Colour":[220,100,100] };
+            ledctrl_socket.send(JSON.stringify(msg));
+            if (ctrl_all == true) {
+              // console.log("sending msg to other RPis...");
+              for (let i = 0; i < conn_list.length; i++){
+                msg = {"CMD":"CLRCHNG", "uuid":user_uuid, "IP":ip_list_array[i], "Colour":[220,100,100] };
+                conn_list[i].send(JSON.stringify(msg));
+              }
+            }
+          }
+        }
+        
+      }
+
+      // panels
+      function hide_all_panels() {
+        $("#color-picker-stream").hide();
+        $("#color-picker-chase").hide();
+        $("#color-picker-chase2").hide();
+        $("#color-picker-chase3").hide();
+        $("#color-picker-theatrechase").hide();
+        $("#color-picker-build").hide();
+        $("#speed-chase").hide();
+        $("#speed-chase2").hide();
+        $("#speed-chase3").hide();
+        $("#speed-rainbow").hide();
+        $("#speed-fadein").hide();
+        $("#speed-build").hide();
+        $("#speed-theatrechase").hide();
+        $("#chunk-build").hide();
+      }
+
+      hide_all_panels();
+
+      function openp(item, index) {
+        $("#" + item).toggle(100);
+      }
+
+      function panel_open(panel_id) {
+        hide_all_panels();
+        if (panel_id != null) {
+          panel_id.forEach(openp);
+        }
+        
+      }
+
+    </script>
+
+  </body>
+
+</html>
