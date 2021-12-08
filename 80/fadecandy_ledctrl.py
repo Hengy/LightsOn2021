@@ -115,7 +115,7 @@ class LEDController():
         # self.effect_delay = 20 # ms
 
         # idle
-        self.idle_mode_max = 5
+        self.idle_mode_max = 6
         self.idle_mode = random.randint(0,self.idle_mode_max)
         self.idle_mode_time = 0
         self.idle_change_time = 0
@@ -176,7 +176,7 @@ class LEDController():
         self.state9_color = 0
         self.state9_step = 0.055
 
-        # meteor
+        # spread
         self.state10_index = 120
         self.state10_paneSize = env_config.WIN_PANE1[1]
         self.state10_posDistance = math.floor(env_config.WIN_PANE1[1]/4)
@@ -187,6 +187,30 @@ class LEDController():
         self.state10_colorchoices = [0, 0.07, 0.11, 0.28, 0.47, 0.66, 0.75, 0.88]
         self.state10_centerBrightness = 0.7
         self.state10_otherBrightness = 0.45
+        
+        # sparkle
+        self.state11_timer = 10
+        self.state11_activeArray = [0] * numLEDs
+        self.state11_depthArray = [0] * numLEDs
+        self.state11_brightnessIndex = [0.027, 0.035, 0.047, 0.058, 0.07, 0.086, 0.105, 0.125, 0.15, 0.172, 0.2, 0.227, 0.262, 0.3, 0.34, 0.376, 0.423, 0.47, 0.525, 0.58, 0.64, 0.7, 0.772, 0.847, 0.92, 1]
+        self.state11_rateMin = 2
+        self.state11_rateMax = 6
+        self.state11_prevNewIndex = 0
+        self.state11_H = 0
+        self.state11_S = 0
+
+        # dual sparkle
+        self.state12_timer = 10
+        self.state12_activeArray = [0] * numLEDs
+        self.state12_depthArray = [0] * numLEDs
+        self.state12_brightnessIndex = [0.027, 0.035, 0.047, 0.058, 0.07, 0.086, 0.105, 0.125, 0.15, 0.172, 0.2, 0.227, 0.262, 0.3, 0.34, 0.376, 0.423, 0.47, 0.525, 0.58, 0.64, 0.7, 0.772, 0.847, 0.92, 1]
+        self.state12_rateMin = 2
+        self.state12_rateMax = 6
+        self.state12_prevNewIndex = 0
+        self.state12_H1 = 0.0
+        self.state12_S1 = 1.0
+        self.state12_H2 = 0.32
+        self.state12_S2 = 1.0
         # ----------------------------------------------------------------------
 
         print("LED Controller initialized")
@@ -268,6 +292,14 @@ class LEDController():
                     elif msg["CMD"] == "SPREAD":
                         self.effect_delay = 25
                         self._state = 10
+                    elif msg["CMD"] == "SPARKLE":
+                        self.pixels = [(0,0,0)] * numLEDs
+                        self.effect_delay = 35
+                        self._state = 11
+                    elif msg["CMD"] == "DUALSPARKLE":
+                        self.pixels = [(0,0,0)] * numLEDs
+                        self.effect_delay = 35
+                        self._state = 12
                     # elif msg["CMD"] == "COMET":
                     #     self.effect_delay = 40
                     #     self._state = 11
@@ -307,6 +339,16 @@ class LEDController():
                             self.state8_color = msg["Colour"][0]/360
                             self.state8_color2 = msg["Colour"][0]/360
                             self.state8_color3 = msg["Colour"][0]/360
+                        if self._state == 11: # sparkle
+                            self.state11_H = msg["Colour"][0]/360
+                            self.state11_S = msg["Colour"][1]/100
+                        if self._state == 12: # dualsparkle
+                            self.state12_H1 = msg["Colour"][0]/360
+                            self.state12_S1 = msg["Colour"][1]/100
+                            self.state12_H2 = (msg["Colour"][0] + 115)/360
+                            if self.state12_H2 > 1:
+                                self.state12_H2 = self.state12_H2 - 1
+                            self.state12_S2 = msg["Colour"][1]/100
                         if self._state == 9: #build
                             self.state9_color = msg["Colour"][0]/360
                             for i in range(numLEDs):
@@ -328,6 +370,10 @@ class LEDController():
                         if self._state == 6: # theatre
                             self.effect_delay = msg["Speed"]
                         if self._state == 10: # spread
+                            self.effect_delay = msg["Speed"]
+                        if self._state == 11: # sparkle
+                            self.effect_delay = msg["Speed"]
+                        if self._state == 12: # dualsparkle
                             self.effect_delay = msg["Speed"]
                     elif msg["CMD"] == "CHNKCHNG":
                         if self._state == 9:
@@ -396,6 +442,10 @@ class LEDController():
                     self.build_up_down()
                 elif self._state == 10: # spread
                     self.connect()
+                elif self._state == 11: # sparkle
+                    self.sparkle()
+                elif self._state == 12: # dual sparkle
+                    self.dualsparkle()
                 else:
                     self.idle_leds()
 
@@ -473,6 +523,9 @@ class LEDController():
 
             elif self.idle_mode == 3:
                 self.idle_color = env_config.IDLE_SYNC_OFFSET01
+            elif self.idle_mode == 6:
+                self.pixels = [(0,0,0)] * numLEDs
+                self.effect_delay = 35
         
         if self.idle_mode == 1:
             self.idle_static()
@@ -489,6 +542,8 @@ class LEDController():
         #     self.adj_brightness()
         elif self.idle_mode == 5:
             self.idle_connect()
+        elif self.idle_mode == 6:
+            self.idle_sparkle()
         else:
             self.pixels = [(100,31,143)] * numLEDs
 
@@ -695,6 +750,35 @@ class LEDController():
                 if self.state10_pos1[pane]+1 <= self.state10_paneStart[pane] + self.state10_paneSize:
                     self.pixels[self.state10_pos2[pane]+1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
 
+
+    # sparkle effect
+    def idle_sparkle(self):
+        if self.state11_timer > 0:
+            self.state11_timer = self.state11_timer - 1
+        else:
+            self.state11_timer = 2
+            for p in range(0, len(self.state11_depthArray)-1):
+                if self.state11_depthArray[p] == 1:
+                    self.state11_activeArray[p] = 0
+                    self.pixels[p] = (0,0,0)
+                elif self.state11_depthArray[p] > 1:
+                    self.state11_depthArray[p] = self.state11_depthArray[p] - 1
+                    b = self.state11_brightnessIndex[self.state11_depthArray[p]-1]
+                    self.pixels[p] = HSVtoRGB(self.state11_H,self.state11_S,b)
+            upperRate = random.randint(self.state11_rateMin, self.state11_rateMax)
+            for x in range(self.state11_rateMin, upperRate):
+                newindex = random.randint(4, numLEDs-4)
+                displacement = newindex - self.state11_prevNewIndex
+                # print("displacemnt: ", displacement)
+                while self.state11_activeArray[newindex] == 1 or self.state11_activeArray[newindex+1] == 1 or self.state11_activeArray[newindex-1] == 1 or self.state11_activeArray[newindex+2] == 1 or self.state11_activeArray[newindex-2] == 1 and (displacement > 20 or displacement < -20):
+                    newindex = random.randint(4, numLEDs-4)
+                    # print("newindex: ", newindex)
+                self.state11_prevNewIndex = newindex
+                self.state11_activeArray[newindex] = 1
+                self.state11_depthArray[newindex] = len(self.state11_brightnessIndex)
+                self.state11_depthArray[newindex+1] = math.floor(len(self.state11_brightnessIndex)*0.66)
+                self.state11_depthArray[newindex-1] = math.floor(len(self.state11_brightnessIndex)*0.66)
+                self.pixels[newindex] = HSVtoRGB(self.state11_H,self.state11_S,self.state11_brightnessIndex[len(self.state11_brightnessIndex)-1])
 
     def idle_breath(self):
         self.pixels = [(0,0,0)] * numLEDs
@@ -1008,6 +1092,70 @@ class LEDController():
             # for i in range(3):
             #     print("Pane: ", i, " Pos1: ", self.state10_pos1[i], " Pos2: ", self.state10_pos2[i])
 
+    # sparkle effect
+    def sparkle(self):
+        if self.state11_timer > 0:
+            self.state11_timer = self.state11_timer - 1
+        else:
+            self.state11_timer = 2
+            for p in range(0, len(self.state11_depthArray)-1):
+                if self.state11_depthArray[p] == 1:
+                    self.state11_activeArray[p] = 0
+                    self.pixels[p] = (0,0,0)
+                elif self.state11_depthArray[p] > 1:
+                    self.state11_depthArray[p] = self.state11_depthArray[p] - 1
+                    b = self.state11_brightnessIndex[self.state11_depthArray[p]-1]
+                    self.pixels[p] = HSVtoRGB(self.state11_H,self.state11_S,b)
+            upperRate = random.randint(self.state11_rateMin, self.state11_rateMax)
+            for x in range(self.state11_rateMin, upperRate):
+                newindex = random.randint(4, numLEDs-4)
+                displacement = newindex - self.state11_prevNewIndex
+                # print("displacemnt: ", displacement)
+                while self.state11_activeArray[newindex] == 1 or self.state11_activeArray[newindex+1] == 1 or self.state11_activeArray[newindex-1] == 1 or self.state11_activeArray[newindex+2] == 1 or self.state11_activeArray[newindex-2] == 1 and (displacement > 20 or displacement < -20):
+                    newindex = random.randint(4, numLEDs-4)
+                    # print("newindex: ", newindex)
+                self.state11_prevNewIndex = newindex
+                self.state11_activeArray[newindex] = 1
+                self.state11_depthArray[newindex] = len(self.state11_brightnessIndex)
+                self.state11_depthArray[newindex+1] = math.floor(len(self.state11_brightnessIndex)*0.66)
+                self.state11_depthArray[newindex-1] = math.floor(len(self.state11_brightnessIndex)*0.66)
+                self.pixels[newindex] = HSVtoRGB(self.state11_H,self.state11_S,self.state11_brightnessIndex[len(self.state11_brightnessIndex)-1])
+
+    # dualsparkle effect
+    def dualsparkle(self):
+        if self.state12_timer > 0:
+            self.state12_timer = self.state12_timer - 1
+        else:
+            self.state12_timer = 2
+            for p in range(0, len(self.state12_depthArray)-1):
+                if self.state12_depthArray[p] == 1:
+                    self.state12_activeArray[p] = 0
+                    self.pixels[p] = (0,0,0)
+                elif self.state12_depthArray[p] > 1:
+                    self.state12_depthArray[p] = self.state12_depthArray[p] - 1
+                    b = self.state12_brightnessIndex[self.state12_depthArray[p]-1]
+                    if self.state12_activeArray[p] == 1 or self.state12_activeArray[p+1] == 1 or self.state12_activeArray[p-1] == 1:
+                        self.pixels[p] = HSVtoRGB(self.state12_H1,self.state12_S1,b)
+                    else:
+                        self.pixels[p] = HSVtoRGB(self.state12_H2,self.state12_S2,b)
+                    
+            upperRate = random.randint(self.state12_rateMin, self.state12_rateMax)
+            for x in range(self.state12_rateMin, upperRate):
+                newindex = random.randint(4, numLEDs-4)
+                displacement = newindex - self.state12_prevNewIndex
+                # print("displacemnt: ", displacement)
+                while self.state12_activeArray[newindex] == 1 or self.state12_activeArray[newindex+1] == 1 or self.state12_activeArray[newindex-1] == 1 or self.state12_activeArray[newindex+2] == 1 or self.state12_activeArray[newindex-2] == 1 and (displacement > 20 or displacement < -20):
+                    newindex = random.randint(4, numLEDs-4)
+                    # print("newindex: ", newindex)
+                self.state12_prevNewIndex = newindex
+                self.state12_activeArray[newindex] = random.randint(1,2)
+                self.state12_depthArray[newindex] = len(self.state12_brightnessIndex)
+                self.state12_depthArray[newindex+1] = math.floor(len(self.state12_brightnessIndex)*0.66)
+                self.state12_depthArray[newindex-1] = math.floor(len(self.state12_brightnessIndex)*0.66)
+                if self.state12_activeArray[newindex] == 1:
+                    self.pixels[newindex] = HSVtoRGB(self.state12_H1,self.state12_S1,self.state12_brightnessIndex[len(self.state12_brightnessIndex)-1])
+                else:
+                    self.pixels[newindex] = HSVtoRGB(self.state12_H2,self.state12_S2,self.state12_brightnessIndex[len(self.state12_brightnessIndex)-1])
 
     # meteor
     # def meteor(self):

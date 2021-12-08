@@ -189,7 +189,7 @@
         </div>
         <!-- BUILD UP DOWN -->
 
-        <!-- METEOR  -->
+        <!-- SPREAD  -->
         <div class="effect-button" alt="Spread" onclick="display_effect('SPREAD'); panel_open(['speed-spread'])">
           <img src="{{url_for('static', filename='icons/spread.png')}}" class="effect-img">
           <p class="effect-name-2">Colour Spread</p>
@@ -201,7 +201,39 @@
           <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
           <div class="speed-slider" id="speed-slider-spread"></div>
         </div>
-        <!-- METEOR -->
+        <!-- SPREAD -->
+
+        <!-- SPARKLE  -->
+        <div class="effect-button" alt="Sparkle" onclick="display_effect('SPARKLE'); panel_open(['color-picker-sparkle','speed-sparkle'])">
+          <img src="{{url_for('static', filename='icons/sparkle.png')}}" class="effect-img">
+          <p class="effect-name-2">Sparkle</p>
+        </div>
+
+        <div class="slider-container" id="speed-sparkle">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-sparkle"></div>
+        </div>
+
+        <div class="color-picker" id="color-picker-sparkle"></div>
+        <!-- SPARKLE -->
+
+        <!-- DUALSPARKLE  -->
+        <div class="effect-button" alt="dualsparkle" onclick="display_effect('DUALSPARKLE'); panel_open(['color-picker-dualsparkle1','speed-dualsparkle'])">
+          <img src="{{url_for('static', filename='icons/dualsparkle.png')}}" class="effect-img">
+          <p class="effect-name-2">Dual Sparkle</p>
+        </div>
+
+        <div class="slider-container" id="speed-dualsparkle">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-dualsparkle"></div>
+        </div>
+
+        <div class="color-picker" id="color-picker-dualsparkle1"></div>
+        <!-- DUALSPARKLE -->
 
       </div>
       {% endif %}
@@ -443,7 +475,9 @@
           ["color-picker-chase2", [0, 100, 80]],
           ["color-picker-chase3", [0, 100, 80]],
           ["color-picker-theatrechase", [0, 100, 80]],
-          ["color-picker-build", [220, 100, 80]]
+          ["color-picker-build", [220, 100, 80]],
+          ["color-picker-sparkle", [180, 10, 80]],
+          ["color-picker-dualsparkle1", [1, 100, 80]]
         ];
 
         window.CWs = [];
@@ -506,7 +540,9 @@
           ["#speed-slider-chase3", -25, -80, -8, 1],
           ["#speed-slider-build", -0.8, -0.9, -0.55, 0.05],
           ["#speed-slider-theatrechase", -40, -80, -25, 1],
-          ["#speed-slider-spread", -30, -50, -10, 1]
+          ["#speed-slider-spread", -30, -50, -10, 1],
+          ["#speed-slider-sparkle", -35, -55, -15, 1],
+          ["#speed-slider-dualsparkle", -35, -55, -15, 1]
         ];
 
         window.SLindex;
@@ -639,6 +675,8 @@
         $("#color-picker-chase3").hide();
         $("#color-picker-theatrechase").hide();
         $("#color-picker-build").hide();
+        $("#color-picker-sparkle").hide();
+        $("#color-picker-dualsparkle1").hide();
         $("#speed-chase").hide();
         $("#speed-chase2").hide();
         $("#speed-chase3").hide();
@@ -646,6 +684,8 @@
         $("#speed-fadein").hide();
         $("#speed-build").hide();
         $("#speed-spread").hide();
+        $("#speed-sparkle").hide();
+        $("#speed-dualsparkle").hide();
         $("#speed-theatrechase").hide();
         $("#chunk-build").hide();
       }
