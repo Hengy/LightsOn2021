@@ -115,8 +115,8 @@ class LEDController():
         # self.effect_delay = 20 # ms
 
         # idle
-        self.idle_mode = random.randint(0,3)
-        self.idle_mode_max = 4
+        self.idle_mode_max = 5
+        self.idle_mode = random.randint(0,self.idle_mode_max)
         self.idle_mode_time = 0
         self.idle_change_time = 0
         self.idle_color = 0
@@ -415,7 +415,7 @@ class LEDController():
             self.idle_change_time = time.time() + env_config.IDLE_COLOR_CHANGE_TIME + random.randint(0,10) - 5
             self.idle_mode_time = time.time() + env_config.IDLE_MODE_CHANGE_TIME
             self.idle_color = random.randint(0,2)
-            self.idle_brightness = random.randint(55,76)/100
+            self.idle_brightness = random.randint(65,80)/100
 
             if self.idle_mode == 4:
                 self.effect_delay = self.idle_build_max_delay
@@ -484,9 +484,11 @@ class LEDController():
             self.adj_brightness()
         elif self.idle_mode == 4:
             self.idle_build()
+        # elif self.idle_mode == 5:
+        #     self.idle_breath()
+        #     self.adj_brightness()
         elif self.idle_mode == 5:
-            self.idle_breath()
-            self.adj_brightness()
+            self.idle_connect()
         else:
             self.pixels = [(100,31,143)] * numLEDs
 
@@ -601,6 +603,97 @@ class LEDController():
                     pos = end
                 else:
                     done = True
+
+    def idle_connect(self):
+        if self.state10_index < 100:
+            self.state10_index = self.state10_index + 1
+
+            offset = self.state10_posDistance * self.state10_index/100
+            offsetRemain = offset % 1
+
+            # print(offset)
+
+            for pane in range(3):
+
+                newpixel = self.state10_pos1[pane] + math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel > self.state10_paneStart[pane] + self.state10_paneSize:
+                    newpixel = newpixel - self.state10_paneSize - 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos1[pane] - math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel < self.state10_paneStart[pane]:
+                    newpixel = newpixel + self.state10_paneSize + 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos2[pane] + math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel > self.state10_paneStart[pane] + self.state10_paneSize:
+                    newpixel = newpixel - self.state10_paneSize - 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos2[pane] - math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel < self.state10_paneStart[pane]:
+                    newpixel = newpixel + self.state10_paneSize + 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+
+        elif self.state10_index >= 100 and self.state10_index < 130:
+            self.state10_index = self.state10_index + 1
+
+            nop = 0
+
+            for i in range(49999):
+                nop = nop + 1
+
+        else:
+            self.state10_index = 4
+
+            # print("pane size: ", self.state10_paneSize)
+            # print("starts: ", self.state10_paneStart)
+
+            oldcolor1 = self.state10_color
+            oldcolor2 = self.state10_color - 1
+            oldcolor3 = self.state10_color + 1
+            if self.state10_color == 0:
+                oldcolor2 = len(self.state10_colorchoices)
+                oldcolor3 = self.state10_color + 1
+            elif self.state10_color == len(self.state10_colorchoices):
+                oldcolor2 = self.state10_color - 1
+                oldcolor3 = 0
+
+            newcolor = random.randint(0, len(self.state10_colorchoices)-1)
+            while newcolor == oldcolor1 or newcolor == oldcolor2 or newcolor == oldcolor3:
+                newcolor = random.randint(0, len(self.state10_colorchoices)-1)
+            self.state10_color = newcolor
+
+            for pane in range(3):
+
+                self.state10_pos1[pane] = random.randint(self.state10_paneStart[pane], math.floor(self.state10_paneSize/2) + self.state10_paneStart[pane])
+                self.state10_pos2[pane] = self.state10_pos1[pane] + math.floor(self.state10_paneSize/2)
+  
+                # self.pixels = [(0,0,0)] * numLEDs
+                if self.state10_pos1[pane]-1 >= self.state10_paneStart[pane]:
+                    self.pixels[self.state10_pos1[pane]-1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                self.pixels[self.state10_pos1[pane]] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]+1 <= self.state10_paneStart[pane] + self.state10_paneSize:
+                    self.pixels[self.state10_pos1[pane]+1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]-1 >= self.state10_paneStart[pane]:
+                    self.pixels[self.state10_pos2[pane]-1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                self.pixels[self.state10_pos2[pane]] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]+1 <= self.state10_paneStart[pane] + self.state10_paneSize:
+                    self.pixels[self.state10_pos2[pane]+1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
 
 
     def idle_breath(self):
