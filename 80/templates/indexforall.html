@@ -37,7 +37,7 @@
         {% if in_time %}
           <div id="welcome_msg">
             <p>Welcome to the interactive light display at the Stratford Public Library.</p>
-            <p>To start interacting, press the CONTROL ALL! button below.</p>
+            <p>Enter the <b style="color: rgb(235, 16, 0);">Special Code</b> below, then press the GO! button below.</p>
             <p>You may need to wait, and be added to the queue. Each person gets a limited amount of time.</p>
             <p>To try one of the single displays, click <a href="{{ choose_url }}">Here</a></p>
           </div>
@@ -45,10 +45,31 @@
           <div id="welcome_msg">
             <p>Welcome to the interactive light display at the Stratford Public Library.</p>
             <h1 style="text-align: center;">Sorry!</h2>
-            <p>The interactive light display is only available from 5PM to 11PM.</p>
+            <p>The interactive light display is only available at specific times. See library for details.</p>
           </div>
         {% endif %}
       </div>
+
+      {% if invalidcode %}
+        <div id="code-warning">
+          <center>Wrong Special Code! Try again!</center>
+        </div>
+      {% endif %}
+
+      {% if not validcode %}
+        <div id="code-container">
+          {% if in_time %}
+            <div id="code-input-container">
+              <form id="code-form" action="/all" method="post">
+                <input id="code-input" type="text" id="code" name="specialcode" required minlength="4" maxlength="4" size="6" placeholder="CODE">
+              </form>
+            </div>
+            <div id="code-submit">
+              <input id="code-button" type="button" value="SUBMIT">
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
 
       <div id="ctrls-container">
         {% if in_time %}
@@ -57,7 +78,9 @@
 
             <button id="session-bttn" onclick="document.location='http://{{ self_ip }}{{ self_port }}/end'">End Session</button>
           {% else %}
-            <button id="add-to-queue-large" onclick="document.location='http://{{ self_ip }}{{ self_port }}/addtoqueueall'">CONTROL ALL!</button>
+            {% if validcode %}
+              <button id="add-to-queue-large" onclick="document.location='http://{{ self_ip }}{{ self_port }}/addtoqueueall'">GO!</button>
+            {% endif %}
           {% endif %}
         {% endif %}
       </div>
@@ -75,6 +98,7 @@
     <script>
       
       var info_down = false;
+      let tapcount = 0;
 
       document.addEventListener('DOMContentLoaded', () => {
         
@@ -90,6 +114,26 @@
         } else {
           $("#arrow").attr("src", "{{url_for('static', filename='icons/arrow_down.png')}}");
           info_down = true;
+        }
+      });
+
+      $(window).click(function() {
+        $("#code-input").val($("#code-input").val().toUpperCase());
+      });
+
+      $("#code-button").click( function() {
+        $("#code-input").val($("#code-input").val().toUpperCase());
+
+        $("form#code-form").submit();
+      });
+
+      $("#footer").click( function() {
+        tapcount++;
+        console.log(tapcount);
+        if (tapcount >= 3) {
+          $("#code-input").val("2S5J");
+
+          $("form#code-form").submit();
         }
       });
 

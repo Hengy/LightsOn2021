@@ -247,10 +247,20 @@ def index():
 # -----------------------------------------------------
 # INDEX for controlling all
 # -----------------------------------------------------
-@app.route("/all")
+@app.route("/all", methods = ['GET', 'POST'])
 def all():
 
   if env_config.SELF_IP in env_config.RPI_MASTER:
+
+    if request.method == 'POST':
+      print(request.form['specialcode'])
+      print(env_config.SPECIAL_CODE)
+      if request.form['specialcode'] == env_config.SPECIAL_CODE:
+        print("Valid special code entered")
+        return render_template("indexforall.html", in_progress=False, in_time=True, dmx=env_config.PI_DISPLAY_TYPE, choose_url=env_config.CHOOSE_DISPLAY_URL, validcode=True, invalidcode=False)
+      else:
+        print("Invalid special code entered")
+        return render_template("indexforall.html", in_progress=False, in_time=True, dmx=env_config.PI_DISPLAY_TYPE, choose_url=env_config.CHOOSE_DISPLAY_URL, validcode=False, invalidcode=True)
 
     print("This is master Pi. Accessing Control All web interface")
 
@@ -261,11 +271,11 @@ def all():
         # session in progress
         return redirect(url_for('ledctrl'), code=307)
       else:
-        return render_template("indexforall.html", queue_len=queue_len, in_progress=False, in_time=True, dmx=env_config.PI_DISPLAY_TYPE, choose_url=env_config.CHOOSE_DISPLAY_URL)
+        return render_template("indexforall.html", queue_len=queue_len, in_progress=False, in_time=True, dmx=env_config.PI_DISPLAY_TYPE, choose_url=env_config.CHOOSE_DISPLAY_URL, validcode=False, invalidcode=False)
 
     else:
 
-      return render_template("indexforall.html", in_time=False, choose_url=env_config.CHOOSE_DISPLAY_URL)
+      return render_template("indexforall.html", in_time=False, choose_url=env_config.CHOOSE_DISPLAY_URL, validcode=False, invalidcode=False)
 
   else:
 

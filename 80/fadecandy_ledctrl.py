@@ -112,6 +112,7 @@ class LEDController():
 
         # effect delay time
         self.effect_delay = 20 # ms
+        # self.effect_delay = 20 # ms
 
         # idle
         self.idle_mode = random.randint(0,3)
@@ -176,18 +177,16 @@ class LEDController():
         self.state9_step = 0.055
 
         # meteor
-        self.state10_index = 0
-        self.state10_color = [310, 0.4, 1]
-        self.state10_color2 = [20, 0.7, 1]
-        self.state10_color3 = [270, 0.7, 1]
-        self.state10_len = 7
-        self.state10_tail_len = 20
-        self.state10_tail_val = 0.9
-        self.state10_decay_rate_min = 0.0
-        self.state10_decay_rate_max = 0.2
-        self.state10_decay_array = []
-        self.state10_array = []
-        self.state10_decay_pixels = []
+        self.state10_index = 120
+        self.state10_paneSize = env_config.WIN_PANE1[1]
+        self.state10_posDistance = math.floor(env_config.WIN_PANE1[1]/4)
+        self.state10_paneStart = [env_config.WIN_PANE1[0], env_config.WIN_PANE2[0], env_config.WIN_PANE3[0]]
+        self.state10_pos1 = [0, 0, 0, 0]
+        self.state10_pos2 = [0, 0, 0, 0]
+        self.state10_color = 0
+        self.state10_colorchoices = [0, 0.07, 0.11, 0.28, 0.47, 0.66, 0.75, 0.88]
+        self.state10_centerBrightness = 0.7
+        self.state10_otherBrightness = 0.45
         # ----------------------------------------------------------------------
 
         print("LED Controller initialized")
@@ -266,9 +265,12 @@ class LEDController():
                                 done = True
 
                         self._state = 9
+                    elif msg["CMD"] == "SPREAD":
+                        self.effect_delay = 25
+                        self._state = 10
                     # elif msg["CMD"] == "COMET":
                     #     self.effect_delay = 40
-                    #     self._state = 10
+                    #     self._state = 11
                     elif msg["CMD"] == "DARK":
                         self.effect_delay = 20
                         print("turning off LEDs...")
@@ -324,6 +326,8 @@ class LEDController():
                         if self._state == 9: # build
                             self.state9_speed = msg["Speed"]
                         if self._state == 6: # theatre
+                            self.effect_delay = msg["Speed"]
+                        if self._state == 10: # spread
                             self.effect_delay = msg["Speed"]
                     elif msg["CMD"] == "CHNKCHNG":
                         if self._state == 9:
@@ -390,8 +394,8 @@ class LEDController():
                     self.triplechase()
                 elif self._state == 9:
                     self.build_up_down()
-                # elif self._state == 10:
-                #     self.meteor()
+                elif self._state == 10: # spread
+                    self.connect()
                 else:
                     self.idle_leds()
 
@@ -815,6 +819,103 @@ class LEDController():
                 else:
                     done = True
 
+
+    # connect from opposite side of window
+    def connect(self):
+        if self.state10_index < 100:
+            self.state10_index = self.state10_index + 1
+
+            offset = self.state10_posDistance * self.state10_index/100
+            offsetRemain = offset % 1
+
+            # print(offset)
+
+            for pane in range(3):
+
+                newpixel = self.state10_pos1[pane] + math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel > self.state10_paneStart[pane] + self.state10_paneSize:
+                    newpixel = newpixel - self.state10_paneSize - 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos1[pane] - math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel < self.state10_paneStart[pane]:
+                    newpixel = newpixel + self.state10_paneSize + 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos2[pane] + math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel > self.state10_paneStart[pane] + self.state10_paneSize:
+                    newpixel = newpixel - self.state10_paneSize - 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+                newpixel = self.state10_pos2[pane] - math.floor(offset)
+                # print("pos1+ ", newpixel)
+                if newpixel < self.state10_paneStart[pane]:
+                    newpixel = newpixel + self.state10_paneSize + 1
+                # print("newIndex: ", newpixel)
+                self.pixels[newpixel] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_otherBrightness)
+
+
+        elif self.state10_index >= 100 and self.state10_index < 130:
+            self.state10_index = self.state10_index + 1
+
+            nop = 0
+
+            for i in range(49999):
+                nop = nop + 1
+
+        else:
+            self.state10_index = 4
+
+            # print("pane size: ", self.state10_paneSize)
+            # print("starts: ", self.state10_paneStart)
+
+            oldcolor1 = self.state10_color
+            oldcolor2 = self.state10_color - 1
+            oldcolor3 = self.state10_color + 1
+            if self.state10_color == 0:
+                oldcolor2 = len(self.state10_colorchoices)
+                oldcolor3 = self.state10_color + 1
+            elif self.state10_color == len(self.state10_colorchoices):
+                oldcolor2 = self.state10_color - 1
+                oldcolor3 = 0
+
+            newcolor = random.randint(0, len(self.state10_colorchoices)-1)
+            while newcolor == oldcolor1 or newcolor == oldcolor2 or newcolor == oldcolor3:
+                newcolor = random.randint(0, len(self.state10_colorchoices)-1)
+            self.state10_color = newcolor
+
+            for pane in range(3):
+
+                self.state10_pos1[pane] = random.randint(self.state10_paneStart[pane], math.floor(self.state10_paneSize/2) + self.state10_paneStart[pane])
+                self.state10_pos2[pane] = self.state10_pos1[pane] + math.floor(self.state10_paneSize/2)
+  
+                # self.pixels = [(0,0,0)] * numLEDs
+                if self.state10_pos1[pane]-1 >= self.state10_paneStart[pane]:
+                    self.pixels[self.state10_pos1[pane]-1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                self.pixels[self.state10_pos1[pane]] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]+1 <= self.state10_paneStart[pane] + self.state10_paneSize:
+                    self.pixels[self.state10_pos1[pane]+1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]-1 >= self.state10_paneStart[pane]:
+                    self.pixels[self.state10_pos2[pane]-1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                self.pixels[self.state10_pos2[pane]] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+
+                if self.state10_pos1[pane]+1 <= self.state10_paneStart[pane] + self.state10_paneSize:
+                    self.pixels[self.state10_pos2[pane]+1] = HSVtoRGB(self.state10_colorchoices[self.state10_color],1,self.state10_centerBrightness)
+            
+            # for i in range(3):
+            #     print("Pane: ", i, " Pos1: ", self.state10_pos1[i], " Pos2: ", self.state10_pos2[i])
+
+
     # meteor
     # def meteor(self):
 
@@ -835,7 +936,7 @@ class LEDController():
     #         new_color = HSVtoRGB(self.state10_color3[0],self.state10_color3[1],self.state10_color3[2])
 
     #     # make new decay array
-    #     major = random.choice([0.45,0.75,0.75,0.45,0.75,0.45,0.45,0.75,0.45,0.45,0.75,0.45,0.75,0.75,0.75,0.45,0.75,0.45,0.45,0.75,0.75,0.45,0.45,0.75,0.45,0.45])
+    #     major = random.choice([0.65,0.8,0.8,0.65,0.8,0.65,0.65,0.8,0.65,0.65,0.8,0.65,0.8,0.8,0.8,0.65,0.8,0.65,0.65,0.8,0.8,0.65,0.65,0.8,0.65,0.65])
     #     if len(self.state10_decay_array) == 0:
     #         for i in range(self.state10_tail_len + 1):
     #             self.state10_decay_array.append(round(random.uniform(self.state10_decay_rate_min, self.state10_decay_rate_max), 2) + major)
@@ -898,5 +999,4 @@ class LEDController():
     #     self.state10_index += 1
     #     if self.state10_index >= numLEDs:
     #         self.state10_index = 0
-
 

@@ -59,7 +59,7 @@
 
       {% if dmx == 0 %}
       <div id="button-container">
-        <p id="effect-title">Interactive</p>
+        <p id="effect-title">Choose an effect</p>
 
         <!-- COLOUR PICKER -->
         <div class="effect-button" alt="Colour Picker" onclick="display_effect('STREAM'); panel_open(['color-picker-stream'])">
@@ -70,9 +70,9 @@
         <div class="color-picker" id="color-picker-stream"></div>
         <!-- COLOUR PICKER -->
 
-      </div>
+      <!-- </div>
       <div id="button-container">
-        <p id="effect-title">Effects</p>
+        <p id="effect-title">Effects</p> -->
 
         <!-- FADE IN -->
         <div class="effect-button" alt="Fade In" onclick="display_effect('FADEIN'); panel_open(['speed-fadein'])">
@@ -189,12 +189,19 @@
         </div>
         <!-- BUILD UP DOWN -->
 
-        <!-- METEOR 
-        <div class="effect-button" alt="Meteor" onclick="display_effect('COMET'); panel_open([])">
-          <img src="{{url_for('static', filename='icons/comet.png')}}" class="effect-img">
-          <p class="effect-name-2">Meteor</p>
+        <!-- METEOR  -->
+        <div class="effect-button" alt="Spread" onclick="display_effect('SPREAD'); panel_open(['speed-spread'])">
+          <img src="{{url_for('static', filename='icons/spread.png')}}" class="effect-img">
+          <p class="effect-name-2">Colour Spread</p>
         </div>
-         METEOR -->
+
+        <div class="slider-container" id="speed-spread">      
+          <img src="{{url_for('static', filename='icons/slow_arrow.png')}}" class="speed-img">
+          <p>Speed</p>
+          <img src="{{url_for('static', filename='icons/fast_arrow.png')}}" class="speed-img">
+          <div class="speed-slider" id="speed-slider-spread"></div>
+        </div>
+        <!-- METEOR -->
 
       </div>
       {% endif %}
@@ -258,6 +265,8 @@
       // var ledctrl_socket = new WebSocket('ws://192.168.0.41:31415/ledctrl');
       let ledctrl_socket = new WebSocket('ws://{{ self_ip }}:31415/ledctrl');
 
+      let retries = 200;
+
       // wait for each websocket connection, timeout if too long
       function waitForConnection(socket, ip) {
         setTimeout(
@@ -271,7 +280,10 @@
               socket.send(JSON.stringify(msg));
             } else {
               console.log("connecting...");
-              waitForConnection(socket, ip, c);
+              retries = retries - 1;
+              if (retries > 0) {
+                waitForConnection(socket, ip, c);
+              }
             }
           }, 25); // wait 25ms
       }
@@ -307,6 +319,8 @@
             c = [0, 100, 70];
           }
           alt = alt * -1;
+
+          retries = 200;
 
           waitForConnection(conn_list[i], ip_list_array[i]);
         }
@@ -386,6 +400,43 @@
         flask_socket.on('check_result', check_handler)
 
 
+        // scale text 
+        var intViewportWidth = window.innerWidth;
+        console.log(intViewportWidth);
+        if (intViewportWidth < 650) {
+          $(".effect-name-2").css("font-size", "28px");
+          $(".effect-name-2").css("padding-top", "3px");
+        }
+        if (intViewportWidth < 530) {
+          $(".effect-name").css("font-size", "28px");
+          $(".effect-name").css("padding-top", "3px");
+        }
+
+        window.addEventListener('resize', () => {
+          intViewportWidth = window.innerWidth;
+          if (intViewportWidth < 650) {
+            $(".effect-name-2").css("font-size", "28px");
+            $(".effect-name-2").css("padding-top", "3px");
+          }
+          if (intViewportWidth < 530) {
+            $(".effect-name").css("font-size", "28px");
+            $(".effect-name").css("padding-top", "3px");
+          }
+          if (intViewportWidth < 450) {
+            $(".effect-name").css("font-size", "24px");
+            $(".effect-name").css("padding-top", "3px");
+            $(".effect-name-2").css("font-size", "22px");
+            $(".effect-name-2").css("padding-top", "3px");
+          }
+          if (intViewportWidth > 650) {
+            $(".effect-name").css("font-size", "36px");
+            $(".effect-name").css("padding-top", "10px");
+            $(".effect-name-2").css("font-size", "36px");
+            $(".effect-name-2").css("padding-top", "10px");
+          }
+        });
+
+
         // https://www.cssscript.com/hsv-hsl-color-wheel-picker-reinvented/
         window.CW_setup = [
           ["color-picker-chase", [0, 100, 80]],
@@ -454,7 +505,8 @@
           ["#speed-slider-chase2", -25, -80, -8, 1],
           ["#speed-slider-chase3", -25, -80, -8, 1],
           ["#speed-slider-build", -0.8, -0.9, -0.55, 0.05],
-          ["#speed-slider-theatrechase", -40, -80, -25, 1]
+          ["#speed-slider-theatrechase", -40, -80, -25, 1],
+          ["#speed-slider-spread", -30, -50, -10, 1]
         ];
 
         window.SLindex;
@@ -593,6 +645,7 @@
         $("#speed-rainbow").hide();
         $("#speed-fadein").hide();
         $("#speed-build").hide();
+        $("#speed-spread").hide();
         $("#speed-theatrechase").hide();
         $("#chunk-build").hide();
       }

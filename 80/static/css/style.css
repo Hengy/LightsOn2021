@@ -100,6 +100,78 @@ body {
     margin-left: 10%;
 }
 
+#code-warning {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    width: calc(80% - 20px);
+    margin-left: 10%;
+    background-color: rgb(235, 16, 0);
+    font-family: 'droid_sansregular', Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: white;
+}
+
+#code-container {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    padding-top: 20px;
+    width: calc(80% - 20px);
+    height: 90px;
+    margin-left: 10%;
+    font-family: 'droid_sansregular', Arial, sans-serif;
+    font-size: 34px;
+    font-weight: 600;
+    color: white;
+}
+
+#code-input {
+    float: left;
+    width: calc(50% - 34px);
+    padding: 15px;
+    font-family: 'droid_sansregular', Arial, sans-serif;
+    font-size: 36px;
+    font-weight: 600;
+    color: rgb(235, 16, 0);
+    border-color: rgba(0,160,221);
+    border-radius: 16px;
+    border-style: solid;
+    border-width: 2px;
+    text-align: center;
+}
+
+#code-submit {
+    margin-left: 10px;
+    float: left;
+    width: calc(50% - 10px);
+}
+
+#code-button {
+    width: calc(100% - 00px);
+    height: 80px;
+    padding: 10px;
+    background: rgba(91,51,147);
+    color: white;
+    font-family: 'droid_sansregular', Arial, sans-serif;
+    font-size: 28px;
+    font-weight: 400;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+}
+
+#code-button:hover {
+    background: rgba(91,51,147);
+    font-weight: 600;
+}
+
+#code-title {
+    width: 100%;
+    padding: 10px;
+}
+
 #arrow {
     float: left;
     margin-right: 10px;
@@ -167,13 +239,16 @@ a {
 }
 
 #add-to-queue-large {
-    width: 100%;
+    margin-left: 30px;
+    width: calc(100% - 60px);
     height: 160px;
     border-width: 0px;
     background-color:  rgba(0,160,221);
     color: white;
     font-size:72px;
     font-weight: 800;
+    cursor: pointer;
+    border-radius: 20px;
 }
 
 #add-to-queue {
@@ -188,6 +263,8 @@ a {
     color: white;
     font-size:36px;
     font-weight: 600;
+    cursor: pointer;
+    border-radius: 10px;
 }
 
 #leave-bttn {
@@ -201,6 +278,12 @@ a {
     color: white;
     font-size:34px;
     font-weight: 600;
+    cursor: pointer;
+    border-radius: 15px;
+}
+
+#leave-bttn:hover {
+    background-color:  rgb(210, 0, 0);
 }
 
 #footer {
@@ -243,10 +326,15 @@ a {
     border-style: solid;
     background-color: rgba(0,160,221,0.1);
     margin-bottom: 20px;
+    cursor: pointer;
 }
 
 .effect-button:active {
     background-color: rgba(0,160,221,0.6);
+}
+
+.effect-button:hover {
+    border-color: rgb(180,180,180);
 }
 
 .effect-img {
@@ -269,28 +357,30 @@ a {
 
 .effect-name {
     width: calc(80% - 110px);
-    height: 40px;
-    margin-top: 24px;
-    margin-bottom: 0px;
+    height: 80px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     float: left;
     /* font-family: 'neucharegular', Arial, sans-serif; */
     font-family: 'droid_sansregular', Arial, sans-serif;
     font-size: 36px;
     color: rgba(91,51,147);
     padding-left: 20px;
+    padding-top: 14px;
 }
 
 .effect-name-2 {
     width: calc(80% - 110px);
-    height: 40px;
-    margin-top: 6px;
-    margin-bottom: 0px;
+    height: 80px;
+    margin-top: 10px;
+    margin-bottom: 10px;
     float: left;
     /* font-family: 'neucharegular', Arial, sans-serif; */
     font-family: 'droid_sansregular', Arial, sans-serif;
     font-size: 36px;
     color: rgba(91,51,147);
     padding-left: 20px;
+    padding-top: 14px;
 }
 
 .color-picker {

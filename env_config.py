@@ -7,13 +7,15 @@ import os
 
 CHOOSE_DISPLAY_URL = 'https://splsparkles.ca/'
 
+SPECIAL_CODE = '2S5J'
+
 #------------------------------------------------------
 # LightsOn RPi IP addresses
 #------------------------------------------------------
 
-RPI_IPS = ('192.168.1.190','192.168.1.191','192.168.1.193')   # LIBRARY ONLY
+# RPI_IPS = ('192.168.1.190','192.168.1.191','192.168.1.193')   # LIBRARY ONLY
 
-# RPI_IPS = ('192.168.0.81',)     # DEBUG ONLY
+RPI_IPS = ('192.168.0.81',)     # DEBUG ONLY
 
 RPI_MASTER = ('192.168.0.80', '192.168.1.192')
 UUID_MODIFIER = '3141fade'
@@ -156,13 +158,17 @@ def config_leds():
 
     if SELF_IP == "192.168.0.80" or SELF_IP == '192.168.0.81':
         global NUM_LEDS
-        WIN_PANE1 = [0,75]
-        WIN_PANE2 = [75,150]
-        WIN_PANE3 = [150,225]
-        WIN_PANE4 = [225,299]
+        WIN_PANE1 = [0,128]
+        WIN_PANE2 = [129,236]
+        WIN_PANE3 = [237,290]
+        WIN_PANE4 = [294,298]
+        # WIN_PANE1 = [0,75]
+        # WIN_PANE2 = [75,150]
+        # WIN_PANE3 = [150,225]
+        # WIN_PANE4 = [225,299]
         PI_DISPLAY_TYPE = 0
         WIN_UPPER_PANE = False
-        NUM_LEDS = 299
+        NUM_LEDS = 369
         # PI_DISPLAY_TYPE = 1
     elif SELF_IP == "192.168.1.190":    # Staff room - upper
         WIN_UPPER_PANE = False
