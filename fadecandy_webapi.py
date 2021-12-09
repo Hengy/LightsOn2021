@@ -2,8 +2,6 @@ import tornado.ioloop
 import tornado.web
 import tornado.websocket
 
-import simple_websocket
-
 import os
 
 import logging
