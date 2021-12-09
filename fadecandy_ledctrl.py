@@ -290,6 +290,7 @@ class LEDController():
 
                         self._state = 9
                     elif msg["CMD"] == "SPREAD":
+                        self.pixels = [(0,0,0)] * numLEDs
                         self.effect_delay = 25
                         self._state = 10
                     elif msg["CMD"] == "SPARKLE":
