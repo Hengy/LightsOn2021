@@ -184,7 +184,7 @@ class LEDController():
         self.state10_pos1 = [0, 0, 0, 0]
         self.state10_pos2 = [0, 0, 0, 0]
         self.state10_color = 0
-        self.state10_colorchoices = [0, 0.07, 0.11, 0.28, 0.47, 0.66, 0.75, 0.88]
+        self.state10_colorchoices = [0, 0.07, 0.11, 0.28, 0.47, 0.66, 0.75, 0.88, 0.47]
         self.state10_centerBrightness = 0.7
         self.state10_otherBrightness = 0.45
         
@@ -193,8 +193,8 @@ class LEDController():
         self.state11_activeArray = [0] * numLEDs
         self.state11_depthArray = [0] * numLEDs
         self.state11_brightnessIndex = [0.027, 0.035, 0.047, 0.058, 0.07, 0.086, 0.105, 0.125, 0.15, 0.172, 0.2, 0.227, 0.262, 0.3, 0.34, 0.376, 0.423, 0.47, 0.525, 0.6, 0.72, 0.84, 0.92, 1, 1, 1]
-        self.state11_rateMin = 16
-        self.state11_rateMax = 28
+        self.state11_rateMin = 12
+        self.state11_rateMax = 22
         self.state11_prevNewIndex = 0
         self.state11_H = 0
         self.state11_S = 0
@@ -204,8 +204,8 @@ class LEDController():
         self.state12_activeArray = [0] * numLEDs
         self.state12_depthArray = [0] * numLEDs
         self.state12_brightnessIndex = [0.027, 0.035, 0.047, 0.058, 0.07, 0.086, 0.105, 0.125, 0.15, 0.172, 0.2, 0.227, 0.262, 0.3, 0.34, 0.376, 0.423, 0.47, 0.525, 0.6, 0.72, 0.84, 0.92, 1, 1, 1]
-        self.state12_rateMin = 16
-        self.state12_rateMax = 28
+        self.state12_rateMin = 12
+        self.state12_rateMax = 22
         self.state12_prevNewIndex = 0
         self.state12_H1 = 0.0
         self.state12_S1 = 1.0
