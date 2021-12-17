@@ -1112,8 +1112,12 @@ class LEDController():
                 newindex = random.randint(4, numLEDs-4)
                 displacement = newindex - self.state11_prevNewIndex
                 # print("displacemnt: ", displacement)
+                retry_count = 25
                 while self.state11_activeArray[newindex] == 1 or self.state11_activeArray[newindex+1] == 1 or self.state11_activeArray[newindex-1] == 1 or self.state11_activeArray[newindex+2] == 1 or self.state11_activeArray[newindex-2] == 1 and (displacement > 20 or displacement < -20):
                     newindex = random.randint(4, numLEDs-4)
+                    retry_count = retry_count - 1
+                    if retry_count == 0:
+                        print("ERROR: max sparkle retries reached")
                     # print("newindex: ", newindex)
                 self.state11_prevNewIndex = newindex
                 self.state11_activeArray[newindex] = 1
